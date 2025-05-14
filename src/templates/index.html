@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CaipiBOT</title>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f7f7f7; }
+        #chat { border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: scroll; background: white; }
+        .user { text-align: right; color: blue; }
+        .bot { text-align: left; color: green; }
+        input { width: 80%; padding: 10px; }
+        button { padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>CaipiBOT</h1>
+    <div id="chat"></div>
+    <input id="mensagem" placeholder="Digite sua mensagem..." />
+    <button onclick="enviarMensagem()">Enviar</button>
+
+    <script>
+        const chat = document.getElementById('chat');
+        const input = document.getElementById('mensagem');
+
+        function adicionarMensagem(texto, classe) {
+            const div = document.createElement('div');
+            div.className = classe;
+            div.innerText = texto;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        async function enviarMensagem() {
+            const texto = input.value;
+            if (!texto.trim()) return;
+
+            adicionarMensagem(texto, 'user');
+            input.value = '';
+
+            const response = await fetch('/responder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mensagem: texto })
+            });
+
+            const data = await response.json();
+            adicionarMensagem(data.resposta, 'bot');
+        }
+
+        // Mensagem inicial
+        window.onload = () => {
+            adicionarMensagem("Olá! Bem-vindo ao CaipiBOT 🍹\nQual o seu nome?", 'bot');
+        };
+    </script>
+</body>
+</html>
