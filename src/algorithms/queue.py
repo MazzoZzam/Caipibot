@@ -1,6 +1,11 @@
+from ..data.cardapio import CARDAPIO
+
 class Node:
-    def __init__(self, id = 0, prox = None):
+    def __init__(self, id = 0, pedidos = [], quant = 0, preco_total = 0, prox = None):
         self.id = id
+        self.pedidos = pedidos
+        self.quant = quant
+        self.preco_total = preco_total
         self.prox = prox
 
 class Queue:
@@ -8,8 +13,8 @@ class Queue:
         self.comeco = None
         self.final = None
 
-    def receber_pedido(self, id):
-        node = Node(id, None)
+    def receber_pedido(self, id, pedido, quant, preco_total):
+        node = Node(id, pedido, quant, preco_total, None)
                 
         if self.comeco is None and self.final is None:    
             self.comeco = node
@@ -27,7 +32,11 @@ class Queue:
         itera = self.comeco
         print("Mostrando pedidos processados")
         while itera:
-            print(f"Pedido id = {itera.id}")
+            print(f"Pedido id: {itera.id}")
+            for item in itera.pedidos:
+                print(f"itens: {CARDAPIO[item]['nome']} ")
+            print(f"Quantidade: {itera.quant}")
+            print(f"Total: {itera.preco_total}")
             print("------------------------")
             itera = itera.prox
 

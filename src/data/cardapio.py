@@ -23,5 +23,4 @@ CARDAPIO = [
    {"nome": "Coca Cola Lata", "preco": 6.99},
    {"nome": "H2O Limão", "preco": 7.99},
    {"nome": "Água Mineral Sem Gás", "preco": 4.50},
-
 ]
