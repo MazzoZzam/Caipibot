@@ -122,16 +122,12 @@ def main():
 
     lista.ver_pedido()
 
-    lista.processar_pedido()
+    lista.processar_pedido(2)
 
     lista.ver_pedido()
     fila.ver_processamento()
     fila.processar_pedido()
     fila.ver_processamento()
-
     
-   
-
-
 if __name__ == '__main__':
     main()

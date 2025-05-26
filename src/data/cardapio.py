@@ -1,26 +1,27 @@
-CARDAPIO = [
-   {"nome": "Ovos de codorna com salame", "preco": 49.00},
-   {"nome": "Pão de alho caseiro", "preco": 48.00},
-   {"nome": "Batata Chips", "preco": 23.50},
-   {"nome": "Bolinho de arroz", "preco": 29.76},
-   {"nome": "Sacanagem com mortadela e cenoura", "preco": 93.99},
-   {"nome": "Batatas assadas", "preco": 30.00},
-   {"nome": "Amendoim picante", "preco": 15.00},
-   {"nome": "Onion rings", "preco": 39.90},
-   {"nome": "Linguiça com cebola", "preco": 17.80},
-   {"nome": "Whisky Black Label Johnnie Walker", "preco": 122.29},
-   {"nome": "Whisky Chivas Regal", "preco": 119.90},
-   {"nome": "Licor Jagermeister", "preco": 115.48},
-   {"nome": "Absolut Vodka", "preco": 73.97},
-   {"nome": "Vinho Concha y Toro Reservado", "preco": 28.90},
-   {"nome": "Whisky Jack Daniels", "preco": 199.90},
-   {"nome": "Vodka Smirnoff", "preco": 72.54},
-   {"nome": "Whisky Ballantine’s American Barrel", "preco": 77.46},
-   {"nome": "Rum Bacardi Carta Blanca", "preco": 48.39},
-   {"nome": "Martini Vermute Rosso", "preco": 46.20},
-   {"nome": "Sucos", "preco": 18.00},
-   {"nome": "Refrigerante Guaraná Antarctica Lata", "preco": 6.99},
-   {"nome": "Coca Cola Lata", "preco": 6.99},
-   {"nome": "H2O Limão", "preco": 7.99},
-   {"nome": "Água Mineral Sem Gás", "preco": 4.50},
-]
+from sqlalchemy import MetaData, Table, Column, Integer, String, DECIMAL
+from ..database.conexao import engine
+
+conn = engine.connect()
+
+# construindo tabela
+meta = MetaData()
+
+# mapeando tabela cardapio
+cardapio = Table (
+    "cardapio",
+    meta,
+    Column('id_item', Integer, primary_key = True),
+    Column('nome_item', String, nullable = False),
+    Column('preco', DECIMAL(6, 2), nullable = False)
+)
+
+# exibindo cardapio
+def mostrar_cardapio():
+    select_itens = cardapio.select()
+
+    result = conn.execute(select_itens)
+
+    for item in result.fetchall():
+        print(item)
+
+    conn.close()

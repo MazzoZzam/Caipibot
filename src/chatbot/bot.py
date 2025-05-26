@@ -1,16 +1,65 @@
-from chatbot.mensagens import MENSAGENS
-from data.cardapio import CARDAPIO
-from utils.calculos import calcular_tempo_entrega
+from ..chatbot.mensagens import MENSAGENS
+from ..database.cliente import inserir_cliente, obter_id
+from ..data.cardapio import mostrar_cardapio
+from ..database.pedido import inserir_pedido
 
-# dicionario do estado e dados da conversa
-estado_conversa = {
+conversa = {
     "etapa": "nome",
-    "nome": "",
-    "telefone": "",
-    "endereco": "",
-    "pedido": [],
+    "nome_cliente": "",
+    "telefone_cliente": "",
+    "endereco": ""
 }
 
+def perguntar_nome(mensagem):
+    estado_conversa["nome"] = mensagem
+    estado_conversa["etapa"] = "telefone"
+    return MENSAGENS["telefone"]
+
+def perguntar_telefone(mensagem):
+    estado_conversa["telefone"] = mensagem
+    estado_conversa["etapa"] = "endereco"
+    return MENSAGENS["endereco"]
+
+def perguntar_endereco(mensagem):
+    estado_conversa["endereco"] = mensagem
+    estado_conversa["etapa"] = "menu"
+
+    # inserindo informacoes do cliente no banco
+    nome = estado_conversa.get("nome")
+    telefone = estado_conversa.get("telefone")
+    endereco = estado_conversa.get("endereco")
+
+    inserir_cliente(nome, telefone, endereco)
+
+    return apresentar_menu()
+
+def apresentar_menu(mensagem):
+    etapa = estado_conversa["etapa"]
+    print("Escolha uma opção:", ["1️⃣ Cardapio", "2️⃣ Fazer pedido", "3️⃣ Ver pedidos", "4️⃣ Gerenciar pedidos", "5️⃣ Realizar pedidos"])
+
+    op = mensagem.strip().lower
+
+    if op == "1" or op == "cardapio": 
+        estado_conversa["etapa"] = "cardapio"
+        return ver_cardapio()
+
+    elif op == "2" or op == "fazer pedido":
+        estado_conversa["etapa"] = "fazer_pedido"   	 
+        return fazer_pedido()
+    
+    elif op == "3" or op == "ver pedido":
+        return "Vendo pedido"
+    
+    elif op == "4" or op == "gerenciar pedido":
+        return "Gerenciando pedido"
+    
+    elif op == "5" or op == "realizar pedido":
+        return "Realizando pedido"
+    
+    else:
+        "Esta etapa nao existe, tente novamente por favor"
+
+'''
 def processar_mensagem(mensagem):
     etapa = estado_conversa["etapa"]
 
@@ -48,7 +97,7 @@ def processar_mensagem(mensagem):
             total = sum(item['preco'] for item in estado_conversa["pedido"])
             
             # calcular tempo de preparo e entrega
-            tempo_preparo, tempo_entrega = calcular_tempo_entrega(total)
+           
             
             # Exibindo "extrato" do usuario
             return (
@@ -57,17 +106,48 @@ def processar_mensagem(mensagem):
                 f"Telefone: {estado_conversa['telefone']}\n"
                 f"Endereço: {estado_conversa['endereco']}\n"
                 f"Total: R$ {total:.2f}\n"
-                f"Tempo de preparo: {tempo_preparo} min\n"
-                f"Tempo de entrega: {tempo_entrega} min\n"
                 "Obrigado pelo seu pedido!"
             )
         else: # caso não encontrar item no cardapio
             return "Item não encontrado. Digite o nome exato do produto como no cardápio ou 'finalizar'."
+'''
 
-def mostrar_cardapio():
+def ver_cardapio(mensagem):
     mensagem = "CARDÁPIO:\n"
     # Exibindo cada item do cardapio
-    for item in CARDAPIO:
-        mensagem += f"- {item['nome']} - R$ {item['preco']:.2f}\n"
-    mensagem += "\nDigite o nome do item que deseja ou 'finalizar'."
+    mostrar_cardapio()
+    mensagem = "\nDigite o nome do item que deseja ou 'finalizar'."
     return mensagem
+
+def fazer_pedido(mensagem):
+    pedidos = []
+
+    id_cliente = obter_id()
+
+    ver_cardapio()
+    print("Insira o numero do pedido, digite 'finalizar' quando terminar")
+
+    inserir_pedido(id_cliente, pedidos)
+
+    
+
+    
+
+# dicionario do estado e dados da conversa
+estado_conversa = {
+    "nome": perguntar_nome,
+    "telefone": perguntar_telefone,
+    "endereco": perguntar_endereco,
+    "menu": apresentar_menu,
+    "cardapio": ver_cardapio,
+    "fazer_pedido": fazer_pedido,
+    # "ver_pedido": ver_pedido,
+    # "gerenciar_pedido": gerenciar_pedido,
+    # "realizar_pedido": realizar_pedido  
+}
+
+def main(): 
+    ver_cardapio()
+
+if __name__ == "__main__":
+    main()
