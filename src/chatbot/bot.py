@@ -35,25 +35,21 @@ def perguntar_endereco(mensagem):
 
 def apresentar_menu(mensagem):
     etapa = estado_conversa["etapa"]
-    print("Escolha uma opção:", ["1️⃣ Cardapio", "2️⃣ Fazer pedido", "3️⃣ Ver pedidos", "4️⃣ Gerenciar pedidos", "5️⃣ Realizar pedidos"])
+    print("Escolha uma opção:", ["1️⃣ Fazer pedido", "2️⃣ Ver pedidos", "3️⃣ Gerenciar pedidos", "4️⃣ Realizar pedidos"])
 
     op = mensagem.strip().lower
 
-    if op == "1" or op == "cardapio": 
-        estado_conversa["etapa"] = "cardapio"
-        return ver_cardapio()
-
-    elif op == "2" or op == "fazer pedido":
+    if op == "1" or op == "fazer pedido":
         estado_conversa["etapa"] = "fazer_pedido"   	 
         return fazer_pedido()
     
-    elif op == "3" or op == "ver pedido":
+    elif op == "2" or op == "ver pedido":
         return "Vendo pedido"
     
-    elif op == "4" or op == "gerenciar pedido":
+    elif op == "3" or op == "gerenciar pedido":
         return "Gerenciando pedido"
     
-    elif op == "5" or op == "realizar pedido":
+    elif op == "4" or op == "realizar pedido":
         return "Realizando pedido"
     
     else:
@@ -112,19 +108,13 @@ def processar_mensagem(mensagem):
             return "Item não encontrado. Digite o nome exato do produto como no cardápio ou 'finalizar'."
 '''
 
-def ver_cardapio(mensagem):
-    mensagem = "CARDÁPIO:\n"
-    # Exibindo cada item do cardapio
-    mostrar_cardapio()
-    mensagem = "\nDigite o nome do item que deseja ou 'finalizar'."
-    return mensagem
 
-def fazer_pedido(mensagem):
+def fazer_pedido():
     pedidos = []
 
     id_cliente = obter_id()
 
-    ver_cardapio()
+    mostrar_cardapio()
     print("Insira o numero do pedido, digite 'finalizar' quando terminar")
 
     inserir_pedido(id_cliente, pedidos)
@@ -139,7 +129,6 @@ estado_conversa = {
     "telefone": perguntar_telefone,
     "endereco": perguntar_endereco,
     "menu": apresentar_menu,
-    "cardapio": ver_cardapio,
     "fazer_pedido": fazer_pedido,
     # "ver_pedido": ver_pedido,
     # "gerenciar_pedido": gerenciar_pedido,

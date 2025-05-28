@@ -1,5 +1,7 @@
-from sqlalchemy import MetaData, Table, Column, Integer, DateTime, ForeignKey, func, text
+from sqlalchemy import MetaData, Table, Column, Integer, DateTime, ForeignKey, select, func
 from ..database.conexao import engine
+from ..database.cliente import cliente
+from ..data.cardapio import cardapio
 
 conn = engine.connect()
 
@@ -12,7 +14,7 @@ pedido = Table (
     meta,
     Column('id_pedido', Integer, primary_key=True),
     Column('data_pedido', DateTime, nullable=False, server_default = func.now()),
-    Column('id_cliente', Integer, ForeignKey('cliente.id_cliente'), nullable=False)
+    Column('id_cliente', Integer, ForeignKey(cliente.c.id_cliente), nullable=False)
 )
 
 # mapeando tabela item_pedido
@@ -20,9 +22,14 @@ item_pedido = Table (
     "item_pedido",
     meta,
     Column('id_item_pedido', Integer, primary_key=True),
-    Column('id_item', Integer, ForeignKey('cardapio.id_item'), nullable=False),
+    Column('id_item', Integer, ForeignKey(cardapio.c.id_item), nullable=False),
     Column('id_pedido', Integer, ForeignKey('pedido.id_pedido'), nullable=False)
 )
+
+try:
+    meta.create_all(engine)
+except Exception as e:
+    print(f"Deu nao: {e}")
 
 # inserir novo pedido
 def inserir_pedido(id_cliente, lista_itens):
@@ -44,23 +51,19 @@ def inserir_pedido(id_cliente, lista_itens):
     # fechando conexao
     conn.close()
 
-def ver_pedido():
+def ver_pedido(cliente_id):
     # contruindo SELECT
-    query = """SELECT 
-    cliente.nome_cliente,
-    cliente.telefone,
-    cliente.endereco,
-    pedido.id_pedido,
-    pedido.data_pedido,
-    cardapio.nome_item,
-    cardapio.preco
-    FROM pedido
-    JOIN cliente ON cliente.id_cliente = pedido.id_cliente
-    JOIN item_pedido ON item_pedido.id_pedido = pedido.id_pedido
-    JOIN cardapio ON cardapio.id_item = item_pedido.id_item"""
-    
+    select_orders = select(cliente.c.nome_cliente, 
+                           cliente.c.telefone, 
+                           cliente.c.endereco, 
+                           pedido.c.id_pedido, 
+                           pedido.c.data_pedido, 
+                           cardapio.c.nome_item, 
+                           cardapio.c.preco).select_from(
+                            pedido.join(cliente).join(item_pedido).join(cardapio)).where(
+                            cliente.c.id_cliente == cliente_id)
 
-    result = conn.execute(text(query))
+    result = conn.execute(select_orders)
 
     # exibindo pedido
     for item in result.fetchall():
@@ -68,4 +71,7 @@ def ver_pedido():
 
     # fechando conexao
     conn.close()
+
+
+
 
