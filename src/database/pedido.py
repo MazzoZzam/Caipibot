@@ -1,12 +1,7 @@
-from sqlalchemy import MetaData, Table, Column, Integer, DateTime, ForeignKey, select, func
-from ..database.conexao import engine
+from sqlalchemy import Table, Column, Integer, DateTime, ForeignKey, select, func
+from ..database.conexao import meta, conn
 from ..database.cliente import cliente
 from ..data.cardapio import cardapio
-
-conn = engine.connect()
-
-# construindo estrutura tabela
-meta = MetaData()
 
 # mapeando tabela pedido
 pedido = Table (
@@ -25,11 +20,6 @@ item_pedido = Table (
     Column('id_item', Integer, ForeignKey(cardapio.c.id_item), nullable=False),
     Column('id_pedido', Integer, ForeignKey('pedido.id_pedido'), nullable=False)
 )
-
-try:
-    meta.create_all(engine)
-except Exception as e:
-    print(f"Deu nao: {e}")
 
 # inserir novo pedido
 def inserir_pedido(id_cliente, lista_itens):

@@ -1,10 +1,5 @@
-from sqlalchemy import MetaData, Table, Column, Integer, String, select
-from ..database.conexao import engine
-
-conn = engine.connect()
-
-# construindo tabela
-meta = MetaData()
+from sqlalchemy import Table, Column, Integer, String, select
+from ..database.conexao import meta, conn
 
 # mapeando tabela cliente
 cliente = Table (
@@ -15,11 +10,6 @@ cliente = Table (
     Column('telefone', String(15), nullable = False),
     Column('endereco', String(100), nullable = False)
 )
-
-try:
-    meta.create_all(engine)
-except Exception as e:
-    print(f"Deu nao: {e}")
 
 # inserindo cliente
 def inserir_cliente(nome, tel, end):
@@ -41,9 +31,3 @@ def obter_id(nome, tel, end):
     result = conn.execute(select_id_client).fetchone()
 
     return result[0]
-
-def main():
-    inserir_cliente("william", "333", "nao sei")
-
-if __name__ == "__main__":
-    main()

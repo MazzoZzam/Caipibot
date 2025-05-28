@@ -136,7 +136,7 @@ estado_conversa = {
 }
 
 def main(): 
-    ver_cardapio()
+    print("a")
 
 if __name__ == "__main__":
     main()

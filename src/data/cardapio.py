@@ -1,10 +1,5 @@
-from sqlalchemy import MetaData, Table, Column, Integer, String, DECIMAL
-from ..database.conexao import engine
-
-conn = engine.connect()
-
-# construindo tabela
-meta = MetaData()
+from sqlalchemy import Table, Column, Integer, String, DECIMAL
+from ..database.conexao import meta, conn
 
 # mapeando tabela cardapio
 cardapio = Table (
@@ -14,11 +9,6 @@ cardapio = Table (
     Column('nome_item', String(50), nullable = False),
     Column('preco', DECIMAL(6, 2), nullable = False)
 )
-
-try:
-    meta.create_all(engine)
-except Exception as e:
-    print(f"Deu nao: {e}")
 
 def criar_cardapio():
 	create_cardapio = cardapio.insert().values([
