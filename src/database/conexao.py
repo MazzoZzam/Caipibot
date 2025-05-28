@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, MetaData
 
 # criando conexao com o banco de dados
 engine = create_engine(
-    "mysql+pymysql://root@localhost:3306/app_teste?charset=utf8mb4",
+    "mysql+pymysql://root@localhost:3306/caipibot_database?charset=utf8mb4",
     echo = True
 )
 
