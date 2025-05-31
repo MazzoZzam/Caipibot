@@ -20,7 +20,6 @@ def inserir_cliente(nome, tel, end):
 
         print(f"Cliente - {nome} registrado com sucesso!")
 
-        conn.close()
     except Exception as e:
         print(f"Nao foi possivel registrar cliente, tente mais tarde: {e}")
     

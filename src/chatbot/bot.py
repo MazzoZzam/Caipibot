@@ -1,142 +1,260 @@
 from ..chatbot.mensagens import MENSAGENS
 from ..database.cliente import inserir_cliente, obter_id
 from ..data.cardapio import mostrar_cardapio
-from ..database.pedido import inserir_pedido
+from ..database.pedido import inserir_pedido, atualizar_pedido, ver_aprovados
+from ..algorithms.linked_list import LinkedList
+from ..algorithms.queue import Queue
+
+lista = LinkedList()
+fila = Queue()
 
 conversa = {
     "etapa": "nome",
     "nome_cliente": "",
     "telefone_cliente": "",
-    "endereco": ""
+    "endereco": "",
+    "pedidos": []
 }
 
+def processar_mensagem(mensagem):
+    etapa = conversa["etapa"]
+    etapa_atual = estado_conversa.get(etapa)
+
+    if etapa_atual:
+        return etapa_atual(mensagem)
+    else:
+        return "Não existe está etapa no processo"
+
 def perguntar_nome(mensagem):
-    estado_conversa["nome"] = mensagem
-    estado_conversa["etapa"] = "telefone"
+    conversa["nome_cliente"] = mensagem
+    conversa["etapa"] = "telefone"
     return MENSAGENS["telefone"]
 
 def perguntar_telefone(mensagem):
-    estado_conversa["telefone"] = mensagem
-    estado_conversa["etapa"] = "endereco"
+    conversa["telefone_cliente"] = mensagem
+    conversa["etapa"] = "endereco"
     return MENSAGENS["endereco"]
 
 def perguntar_endereco(mensagem):
-    estado_conversa["endereco"] = mensagem
-    estado_conversa["etapa"] = "menu"
+    conversa["endereco"] = mensagem
+    conversa["etapa"] = "menu"
 
-    # inserindo informacoes do cliente no banco
-    nome = estado_conversa.get("nome")
-    telefone = estado_conversa.get("telefone")
-    endereco = estado_conversa.get("endereco")
+    # obtendo informações do cliente
+    nome = conversa.get("nome_cliente")
+    telefone = conversa.get("telefone_cliente")
+    endereco = conversa.get("endereco")
 
+    # inserindo informações do cliente no banco
     inserir_cliente(nome, telefone, endereco)
 
-    return apresentar_menu()
+    return ("Ótimo! Aqui está as minhas principais funções, em que poderei ser útil?" + apresentar_menu(""))
 
 def apresentar_menu(mensagem):
-    etapa = estado_conversa["etapa"]
-    print("Escolha uma opção:", ["1️⃣ Fazer pedido", "2️⃣ Ver pedidos", "3️⃣ Gerenciar pedidos", "4️⃣ Realizar pedidos"])
+    if not mensagem:
+        return ("Escolha uma opção pelos números ou palavras-chaves: \n"
+                "1️⃣ Fazer pedido \n"
+                "2️⃣ Gerenciar pedidos \n"
+                "3️⃣ Realizar pedidos processados \n"
+                "4️⃣ Ver pedidos aprovados")
 
-    op = mensagem.strip().lower
+    op = mensagem.strip().lower()
 
-    if op == "1" or op == "fazer pedido":
-        estado_conversa["etapa"] = "fazer_pedido"   	 
-        return fazer_pedido()
+    if op == "1" or "fazer" in op:
+        conversa["etapa"] = "fazer_pedido"   	 
+        return fazer_pedido(mensagem)
     
-    elif op == "2" or op == "ver pedido":
-        return "Vendo pedido"
+    elif op == "2" or "ver" in op:
+        conversa["etapa"] = "gerenciar_pedido"
+        return gerenciar_pedido(mensagem)
     
-    elif op == "3" or op == "gerenciar pedido":
-        return "Gerenciando pedido"
+    elif op == "3" or "gerenciar" in op:
+        conversa["etapa"] = "realizar_pedido"
+        return realizar_pedido(mensagem)
     
-    elif op == "4" or op == "realizar pedido":
-        return "Realizando pedido"
-    
+    elif op == "4" or "aprovados" in op:
+        conversa["etapa"] = "pedidos_aprovados"
+        return pedidos_aprovados(mensagem)
+
     else:
-        "Esta etapa nao existe, tente novamente por favor"
+        return "Esta opção é invalida, tente novamente via números ou palavras-chave como 'fazer', 'ver', 'gerenciar' e 'aprovados'"
 
-'''
-def processar_mensagem(mensagem):
-    etapa = estado_conversa["etapa"]
+def fazer_pedido(mensagem):
+    conversa["pedidos"] = []
+    conversa["etapa"] = "item_escolhido"
+    return ("Que bom que você quer fazer um pedido com a gente! Aqui está nosso cardápio: \n"
+            f"{mostrar_cardapio()} \n"
+            "Por favor selecione algum item por numero ou digite 'finalizar'")
 
-    # Perguntar nome do usuário
-    if etapa == "nome":
-        estado_conversa["nome"] = mensagem
-        estado_conversa["etapa"] = "telefone"
-        return MENSAGENS["telefone"]
-
-    # Perguntar telefone do usuário
-    elif etapa == "telefone":
-        estado_conversa["telefone"] = mensagem
-        estado_conversa["etapa"] = "endereco"
-        return MENSAGENS["endereco"]
-
-    # Perguntar endereço do usuário
-    elif etapa == "endereco":
-        estado_conversa["endereco"] = mensagem
-        estado_conversa["etapa"] = "menu"
-        return mostrar_cardapio()
-
-    # Mostrar e fazer pedido
-    elif etapa == "menu":
-        # Limpeza de input, sem espaços e letras minusculas
-        item_escolhido = mensagem.strip().lower()
+def item_escolhido(mensagem):
+    item = mensagem.strip().lower()
+    pedidos = conversa["pedidos"]
+    
+    if item == "finalizar":
+        if not pedidos:
+            return "Nenhum item adicionado ao pedido"
         
-        # Tentando encontrar itens no cardapio de acordo com o input do usuario 
-        item_encontrado = next((item for item in CARDAPIO if item['nome'].lower() == item_escolhido), None)
+        id_cliente = obter_id(conversa["nome_cliente"], conversa["telefone_cliente"], conversa["endereco"])
 
-        if item_encontrado: # item encontrado
-            estado_conversa["pedido"].append(item_encontrado)
-            return f"Item '{item_encontrado['nome']}' adicionado. Deseja mais alguma coisa? Se não, digite 'finalizar'."
-        elif mensagem.lower() == "finalizar": # pedido finalizado
-            # calcular preço total dos itens pedidos
-            total = sum(item['preco'] for item in estado_conversa["pedido"])
-            
-            # calcular tempo de preparo e entrega
-           
-            
-            # Exibindo "extrato" do usuario
-            return (
-                f"Pedido finalizado!\n"
-                f"Nome: {estado_conversa['nome']}\n"
-                f"Telefone: {estado_conversa['telefone']}\n"
-                f"Endereço: {estado_conversa['endereco']}\n"
-                f"Total: R$ {total:.2f}\n"
-                "Obrigado pelo seu pedido!"
-            )
-        else: # caso não encontrar item no cardapio
-            return "Item não encontrado. Digite o nome exato do produto como no cardápio ou 'finalizar'."
-'''
+        inserir_pedido(id_cliente, pedidos)
 
-
-def fazer_pedido():
-    pedidos = []
-
-    id_cliente = obter_id()
-
-    mostrar_cardapio()
-    print("Insira o numero do pedido, digite 'finalizar' quando terminar")
-
-    inserir_pedido(id_cliente, pedidos)
-
+        conversa["etapa"] = "menu"
+        return "Pedido finalizado com sucesso! Retornando ao menu... \n" + apresentar_menu(mensagem)
     
 
-    
+    if int(item) > 0 and int(item) <= 30:
+        pedidos.append(int(item))
+        return f"Item: {item} adicionado com sucesso! Caso tenha concluido o pedido digite 'finalizar'"
+    else:  
+        return "Item não encontrado, tente novamente ou digite 'finalizar'"
 
-# dicionario do estado e dados da conversa
+def ver_pedido():
+    listar_pedidos = lista.ver_pedido()
+
+    if not listar_pedidos:
+        return "Nenhum pedido foi feito para ser visualizado"
+
+    resposta = "Certo aqui estão seus pedidos! \n"
+
+    for pedido in listar_pedidos:
+        resposta += f"""
+        ID do pedido - {pedido['ID_pedido']}, \n
+        Nome Cliente - {pedido['nome']}, \n
+        Telefone - {pedido['telefone']}, \n
+        Endereço - {pedido['endereco']}, \n
+        Data do Pedido - {pedido['data_pedido']}, \n
+        Itens - {', '.join(str(i) for i in pedido['itens_pedido'])}, \n
+        Valor Total do Pedido - {pedido['valor_total']} \n
+        *--------------------------*
+        """
+
+    return resposta
+
+def gerenciar_pedido(mensagem):
+    conversa["etapa"] = "escolher_pedido"
+
+    resposta = ver_pedido()
+
+    return ("Entendido vamos gerenciar os pedidos \n"
+            "Esses são os pedidos disponíveis: \n"
+            f"{resposta} \n"
+            "O que deseja fazer com os pedidos?: \n"
+            "1️⃣ Processar primeiro pedido \n"
+            "2️⃣ Realizar ultimo pedido \n"
+            "3️⃣ Realizar pedidos por id \n"
+            "4️⃣ Voltar ao menu \n")
+
+def escolher_pedido(mensagem):
+    op = mensagem.strip().lower()
+
+    if op == 1 or "inicio" in op:
+        lista.processar_pedido_inicio()
+        conversa["etapa"] = "menu"
+        return ("Primeiro pedido processado com sucesso! \n"
+                "Retornando ao menu..." + apresentar_menu(mensagem))
+
+    elif op == 2 or "ultimo" in op:
+        lista.processar_pedido_fim()
+        conversa["etapa"] = "menu"
+        return ("Ultimo pedido processado com sucesso! \n"
+                "Retornando ao menu..." + apresentar_menu(mensagem))
+    
+    elif op == 3 or "id" in op:
+        conversa["etapa"] = "aguardar_id"
+        return "Por favor, digite o ID do pedido que deseja processar"
+    
+    elif op == 4 or "voltar" in op or "menu" in op:
+        conversa["etapa"] = "menu"
+        return "Retornando ao menu..." + apresentar_menu(mensagem)
+
+    else:
+        return "Opção invalida, tente novamente"
+
+def aguardar_id(mensagem):
+
+    id = int(mensagem.strip().lower())
+
+    lista.processar_pedido(id)
+
+    conversa["etapa"] = "menu"
+
+    return "Retornando ao menu..." + apresentar_menu(mensagem)
+
+def ver_processados():
+    listar_pedidos = fila.ver_processamento()
+
+    if not listar_pedidos:
+        return "Nenhum pedido foi processado para ser visualizado"
+
+    resposta = "Certo aqui estão seus pedidos em processo! \n"
+
+    for pedido in listar_pedidos:
+        resposta += f"""
+        ID do pedido - {pedido[0]}, \n
+        Nome Cliente - {pedido[1]}, \n
+        Telefone - {pedido[2]}, \n
+        Endereço - {pedido[3]}, \n
+        Data do Pedido - {pedido[4]}, \n
+        Itens - {', '.join(str(i) for i in pedido[5])}, \n
+        Valor Total do Pedido - {pedido[6]} \n
+        *--------------------------*
+        """
+
+    return resposta
+
+def realizar_pedido(mensagem):
+    conversa["etapa"] = "processar_pedido"
+
+    fila_id = fila.obter_id_fila()
+
+    return ("Entendido vamos realizar os pedidos \n"
+            "Esses são os pedidos em processamento: \n"
+            f"{ver_processados()} \n"
+            f"Você deseja atualizar o pedido: {fila_id} como pronto?"
+            "1️⃣ - Sim \n"
+            "2️⃣ - Nao \n")
+
+def processar_pedido(mensagem):
+    op = mensagem.strip().lower()
+    id_pedido = fila.obter_id_fila
+
+    if op == 1 or "sim" in op:
+        fila.processar_pedido()
+
+        atualizar_pedido(id_pedido)
+
+        conversa["etapa"] = "menu"
+
+        return "Pedido realizado com sucesso! Retornando ao menu..." + apresentar_menu(mensagem)
+    elif op == 2 or "nao" in op:
+        return "Retornando ao menu..." + apresentar_menu(mensagem)
+    else: 
+        return "Opção invalida, tente novamente"
+
+def pedidos_aprovados(mensagem):
+    conversa["etapa"] = "menu"
+
+    aprovados = ver_aprovados()
+
+    if not aprovados:
+        return "Nenhum pedido aprovado, retornando ao menu..." + apresentar_menu(mensagem)
+
+    return ("Aqui estão os pedidos que foram aprovados para entrega! \n"
+            f"{aprovados} \n"
+            "Retornando ao menu..." + apresentar_menu(mensagem))
+
+# dicionario do estado da conversa
 estado_conversa = {
     "nome": perguntar_nome,
     "telefone": perguntar_telefone,
     "endereco": perguntar_endereco,
     "menu": apresentar_menu,
     "fazer_pedido": fazer_pedido,
-    # "ver_pedido": ver_pedido,
-    # "gerenciar_pedido": gerenciar_pedido,
-    # "realizar_pedido": realizar_pedido  
+    "item_escolhido": item_escolhido,
+    "ver_pedido": ver_pedido,
+    "gerenciar_pedido": gerenciar_pedido,
+    "escolher_pedido": escolher_pedido,
+    "aguardar_id": aguardar_id,
+    "realizar_pedido": realizar_pedido,
+    "aguardar_input": processar_pedido,
+    "pedidos_aprovados": pedidos_aprovados  
 }
-
-def main(): 
-    print("a")
-
-if __name__ == "__main__":
-    main()

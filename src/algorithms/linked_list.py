@@ -1,11 +1,22 @@
-from ..algorithms.queue import *
-from ..data.cardapio import CARDAPIO
+from ..algorithms.queue import Queue
+
+fila = Queue() 
 
 class Node:
-    def __init__(self, id = 0, pedidos = [], quant = 0, preco_total = 0, prox = None):
+    def __init__(self, id = 0, 
+                 nome = "", 
+                 tel = "", 
+                 end = "",
+                 data_pedido = "", 
+                 pedidos = [], 
+                 preco_total = 0, 
+                 prox = None):
         self.id = id
+        self.nome = nome
+        self.tel = tel
+        self.end = end
+        self.data_pedido = data_pedido
         self.pedidos = pedidos
-        self.quant = quant
         self.preco_total = preco_total
         self.prox = prox
 
@@ -13,10 +24,10 @@ class LinkedList:
     def __init__(self):
         self.inicio = None
 
-    def novo_pedido(self, id, pedido, quant, preco_total): 
+    def novo_pedido(self, id, nome, tel, end, data_pedido, pedidos, preco_total): 
 
         if self.inicio is None:
-            self.inicio = Node(id, pedido, quant, preco_total, None)
+            self.inicio = Node(id, nome, tel, end, data_pedido, pedidos, preco_total, None)
             return
         
         itera = self.inicio
@@ -24,41 +35,46 @@ class LinkedList:
         while itera.prox:
             itera = itera.prox
         
-        itera.prox = Node(id, pedido, quant, preco_total, None)
+        itera.prox = Node(id, nome, tel, end, data_pedido, pedidos, preco_total, None)
 
-    def ver_pedido(self):
-        if self.inicio is None:
-            print("Nao tem nenhum pedido para visualizar")
-            return
-        
+        return
+
+    def ver_pedido(self):            
+        lista_pedidos = [] 
         itera = self.inicio
-        print("Mostrando pedidos")
         while itera:
-            print(f"Pedido id: {itera.id}")
-            for item in itera.pedidos:
-                print(f"itens: {CARDAPIO[item]['nome']} ")
-            print(f"Quantidade: {itera.quant}")
-            print(f"Total: {itera.preco_total}")
-            print("------------------------")
+            pedidos = {
+                "ID_pedido": itera.id,
+                "nome": itera.nome,
+                "telefone": itera.tel,
+                "endereco": itera.end,
+                "data_pedido": itera.data_pedido,
+                "itens_pedido": itera.pedidos,
+                "valor_total": itera.preco_total
+            }
+            lista_pedidos.append(pedidos)
             itera = itera.prox
+
+        return lista_pedidos
 
     def processar_pedido_inicio(self):
         if self.inicio is None:
-            print("A lista de pedidos esta vazia")
-            return
+            return ("A lista de pedidos esta vazia")
+            
         
         itera = self.inicio
 
-        fila.receber_pedido(itera.id, itera.pedidos, itera.quant, itera.preco_total)
-
+        fila.receber_pedido(itera.id, itera.tel, itera.end, itera.data_pedido, itera.pedidos, itera.preco_total)
         itera = itera.prox
 
         self.inicio = itera
 
+        return
+
     def processar_pedido_fim(self):
         if self.inicio is None:
-            print("A lista de pedidos esta vazia")
-            return
+            return ("A lista de pedidos esta vazia")
+            
         
         itera = self.inicio
         ant = None
@@ -67,67 +83,32 @@ class LinkedList:
             ant = itera
             itera = itera.prox
 
-        fila.receber_pedido(itera.id, itera.pedidos, itera.quant, itera.preco_total)
+        fila.receber_pedido(itera.id, itera.tel, itera.end, itera.data_pedido, itera.pedidos, itera.preco_total)
         ant.prox = None
+
+        return
 
     def processar_pedido(self, id):
         itera = self.inicio
         ant = None
 
         if self.inicio is None:
-            print("A lista de pedidos esta vazia")
-            return 
+            return ("A lista de pedidos esta vazia")
+            
         elif self.inicio.id == id:
             self.inicio = itera.prox
-            fila.receber_pedido(itera.id, itera.pedidos, itera.quant, itera.preco_total)
+            fila.receber_pedido(itera.id, itera.tel, itera.end, itera.data_pedido, itera.pedidos, itera.preco_total)
             return
         
         while itera.id != id:
+            if itera is None:
+                return "ID do pedido não existe, por favor tente novamente"
+            
             ant = itera
             itera = itera.prox
+        
 
-        fila.receber_pedido(itera.id, itera.pedidos, itera.quant, itera.preco_total)
-        ant.prox = itera.prox 
+        fila.receber_pedido(itera.id, itera.tel, itera.end, itera.data_pedido, itera.pedidos, itera.preco_total)
+        ant.prox = itera.prox
 
-lista = LinkedList()
-fila = Queue() 
-
-def main():
-    index = 0
-    pedido = []
-    quant = 0
-    preco_total = 0
-
-    for item in CARDAPIO:
-        print(f"{index}. {item['nome']} - Preco: R${item['preco']}")
-        index += 1
-
-    print("faca seu pedido ai:")
-    print("--------------------")
-
-    pedido = [12, 13, 14]
-    quant = len(pedido)
-    for item in pedido:
-        preco_total += CARDAPIO[item]['preco']
-
-    lista.novo_pedido(1, pedido, quant, preco_total)
-
-    preco_total = 0
-    pedido = [21, 22, 23, 20]
-    quant = len(pedido)
-    for item in pedido:
-        preco_total += CARDAPIO[item]['preco']
-
-    lista.novo_pedido(2, pedido, quant, preco_total)
-
-    lista.ver_pedido()
-
-    lista.processar_pedido(2)
-
-    lista.ver_pedido()
-    fila.ver_processamento()
-    fila.processar_pedido()
-    fila.ver_processamento()
-    
-if __name__ == '__main__':
-    main()
+        return

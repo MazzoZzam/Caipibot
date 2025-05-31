@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, String, DECIMAL
+from sqlalchemy import Table, Column, Integer, String, DECIMAL, func, select
 from ..database.conexao import meta, conn
 
 # mapeando tabela cardapio
@@ -10,13 +10,20 @@ cardapio = Table (
     Column('preco', DECIMAL(6, 2), nullable = False)
 )
 
+def verificar_cardapio():
+    select_itens = select(func.count()).select_from(cardapio)
+
+    result = conn.execute(select_itens).fetchone()
+
+    return result[0]
+
 def criar_cardapio():
-	create_cardapio = cardapio.insert().values([
+    create_cardapio = cardapio.insert().values([
 		{'nome_item': 'ovos de codorna com salame', 'preco': 49.00},
 		{'nome_item': 'pao de alho caseiro ', 'preco': 48.00},
 		{'nome_item': 'batata chips', 'preco': 23.50},
 		{'nome_item': 'bolinho de arroz', 'preco': 29.99},
-		{'nome_item': 'sacanagem com mortadela e cenoura', 'preco': 94.99},
+		{'nome_item': 'sacanagem com mortadela e cenoura', 'preco': 14.99},
 		{'nome_item': 'batatas assadas', 'preco': 30.00},
 		{'nome_item': 'amendoim picante', 'preco': 15.00},
 		{'nome_item': 'onion rings', 'preco': 39.90},
@@ -43,18 +50,39 @@ def criar_cardapio():
 		{'nome_item': 'H2O limao', 'preco': 7.99},
 		{'nome_item': 'agua sem gas', 'preco': 3.99}
 	])
-	
-	conn.execute(create_cardapio)
-	
-	conn.commit()	
+    conn.execute(create_cardapio)
+    conn.commit()
+    
+
 
 # exibindo cardapio
 def mostrar_cardapio():
-    select_itens = cardapio.select()
+    select_foods = cardapio.select().where(cardapio.c.id_item <= 9)
+    select_beers = cardapio.select().where(cardapio.c.id_item >= 10, cardapio.c.id_item < 26)
+    select_drinks = cardapio.select().where(cardapio.c.id_item > 25)
 
-    result = conn.execute(select_itens)
-
-    for item in result.fetchall():
-        print(item)
-
-    conn.close()
+    result_food = conn.execute(select_foods)
+    result_beer = conn.execute(select_beers)
+    result_drink = conn.execute(select_drinks)
+    
+    pestico = ""
+    bebida = ""
+    drink = ""
+    
+    for item in result_food.fetchall():
+        pestico += f"{item[0]}. {item[1]} - R${item[2]} \n"
+    
+    
+    for item in result_beer.fetchall():
+        bebida += f"{item[0]}. {item[1]} - R${item[2]} \n"
+    
+    
+    for item in result_drink.fetchall():
+        drink += f"{item[0]}. {item[1]} - R${item[2]} \n"
+        
+    return ("PETISCOS: \n"
+    		f"{pestico}\n"
+            "BEBIDAS ALCOOLICAS: \n"
+            f"{bebida}\n"
+            "BEBIDAS NAO-ALCOOLICAS: \n"
+            f"{drink}")

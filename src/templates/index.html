@@ -3,90 +3,27 @@
   <head>
     <title>CaipiBOT</title>
     <meta charset="utf-8" />
-    <style>
-      body {
-        font-family: Arial;
-        padding: 20px;
-        background: #f7f7f7;
-      }
-      #chat {
-        border: 1px solid #ccc;
-        padding: 10px;
-        height: 400px;
-        overflow-y: scroll;
-        background: white;
-      }
-      .user {
-        text-align: right;
-        color: blue;
-      }
-      .bot {
-        text-align: left;
-        color: green;
-      }
-      input {
-        width: 80%;
-        padding: 10px;
-      }
-      button {
-        padding: 10px;
-      }
-    </style>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='icon.png') }}" type="image/x-icon" />
+
+    <!-- CSS e JavaScript corretos -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   </head>
-  <body>
-    <h1>CaipiBOT</h1>
+
+  <body style="background-image: url('{{ url_for('static', filename='fundo.jpeg') }}');">
+
+    <h1 class="title">CaipiBOT</h1>
+
     <div id="chat"></div>
-    <input id="mensagem" placeholder="Digite sua mensagem..." />
-    <button onclick="enviarMensagem()">Enviar</button>
 
-    <script>
-      // Obtendo elementos html para exibir no área chat
-      // Obtendo elementos hmtl no input
-      const chat = document.getElementById("chat");
-      const input = document.getElementById("mensagem");
+    <div class="input-container">
+      <input id="mensagem" placeholder="Digite sua mensagem..." />
+      <button onclick="enviarMensagem()">Enviar</button>
+    </div>
 
-      function adicionarMensagem(texto, classe) {
-        // Criando uma área para o bot exibir sua mensagem
-        const div = document.createElement("div");
-        // Aplicando estilos as mensagens do bot e usuário
-        div.className = classe;
-        // Definindo texto da mensagem
-        div.innerText = texto;
-        // Adicionando nova mensagem a conversa, abaixo da última mensagem
-        chat.appendChild(div);
-        // Rolando a caixa para baixo, caso acabe espaço
-        chat.scrollTop = chat.scrollHeight;
-      }
-
-      async function enviarMensagem() {
-        // Obtendo o valor digitado pelo usuario
-        const texto = input.value;
-        if (!texto.trim()) return; // Caso o usuário não envie nada
-
-        // Adicionar mensagem a área do chatbot
-        adicionarMensagem(texto, "user");
-        input.value = ""; // Limpando caixa de input depois de enviar mensagem
-
-        // Mandando mensagem para o Flask em formato JSON
-        const response = await fetch("/responder", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ mensagem: texto }),
-        });
-
-        // Esperando resposta do servidor
-        const data = await response.json();
-        // Manda a resposta do bot para a área de texto
-        adicionarMensagem(data.resposta, "bot");
-      }
-
-      // Mensagem inicial
-      window.onload = () => {
-        adicionarMensagem(
-          "Olá! Bem-vindo ao CaipiBOT 🍹\nQual o seu nome?",
-          "bot"
-        );
-      };
-    </script>
+    <!-- Sons em Base64 -->
+    <audio id="som-envio" src="data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA..."></audio>
+    <audio id="som-resposta" src="data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA..."></audio>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
   </body>
 </html>
