@@ -1,6 +1,4 @@
-from ..algorithms.queue import Queue
-
-fila = Queue() 
+from ..algorithms.queue import fila
 
 class Node:
     def __init__(self, id = 0, 
@@ -39,7 +37,10 @@ class LinkedList:
 
         return
 
-    def ver_pedido(self):            
+    def ver_pedido(self): 
+        if self.inicio is None:
+            return "" 
+
         lista_pedidos = [] 
         itera = self.inicio
         while itera:
@@ -61,10 +62,9 @@ class LinkedList:
         if self.inicio is None:
             return ("A lista de pedidos esta vazia")
             
-        
         itera = self.inicio
 
-        fila.receber_pedido(itera.id, itera.tel, itera.end, itera.data_pedido, itera.pedidos, itera.preco_total)
+        fila.receber_pedido(itera.id, itera.nome, itera.tel, itera.end, itera.data_pedido, itera.pedidos, itera.preco_total)
         itera = itera.prox
 
         self.inicio = itera
@@ -75,15 +75,18 @@ class LinkedList:
         if self.inicio is None:
             return ("A lista de pedidos esta vazia")
             
-        
         itera = self.inicio
         ant = None
+
+        if itera.prox is None:
+            fila.receber_pedido(itera.id, itera.nome, itera.tel, itera.end, itera.data_pedido, itera.pedidos, itera.preco_total)
+            return
 
         while itera.prox:
             ant = itera
             itera = itera.prox
 
-        fila.receber_pedido(itera.id, itera.tel, itera.end, itera.data_pedido, itera.pedidos, itera.preco_total)
+        fila.receber_pedido(itera.id, itera.nome, itera.tel, itera.end, itera.data_pedido, itera.pedidos, itera.preco_total)
         ant.prox = None
 
         return
@@ -97,7 +100,7 @@ class LinkedList:
             
         elif self.inicio.id == id:
             self.inicio = itera.prox
-            fila.receber_pedido(itera.id, itera.tel, itera.end, itera.data_pedido, itera.pedidos, itera.preco_total)
+            fila.receber_pedido(itera.id, itera.nome, itera.tel, itera.end, itera.data_pedido, itera.pedidos, itera.preco_total)
             return
         
         while itera.id != id:
@@ -108,7 +111,10 @@ class LinkedList:
             itera = itera.prox
         
 
-        fila.receber_pedido(itera.id, itera.tel, itera.end, itera.data_pedido, itera.pedidos, itera.preco_total)
+        fila.receber_pedido(itera.id, itera.nome, itera.tel, itera.end, itera.data_pedido, itera.pedidos, itera.preco_total)
         ant.prox = itera.prox
 
         return
+    
+
+lista = LinkedList()

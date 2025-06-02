@@ -22,7 +22,7 @@ class Queue:
         self.final = None
 
     def receber_pedido(self, id, nome, tel, end, data_pedido, pedidos, preco_total):
-        node = Node(id, id, nome, tel, end, data_pedido, pedidos, preco_total, None)
+        node = Node(id, nome, tel, end, data_pedido, pedidos, preco_total, None)
                 
         if self.comeco is None and self.final is None:    
             self.comeco = node
@@ -35,7 +35,7 @@ class Queue:
     
     def ver_processamento(self):
         if self.comeco is None:
-            return "Nao tem nenhum pedido para visualizar"
+            return ""
             
         lista_pedidos = [] 
         itera = self.comeco
@@ -56,7 +56,12 @@ class Queue:
 
     def processar_pedido(self):
         if self.comeco is None:
-            return ("Nao tem nenhum pedido para preparar")
+            return
+        
+        if self.comeco.id == self.final.id:
+            self.comeco = None
+            self.final = None
+            return
             
         itera = self.comeco
 
@@ -70,4 +75,5 @@ class Queue:
         itera = self.comeco
 
         return itera.id
-           
+
+fila = Queue()

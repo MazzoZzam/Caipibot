@@ -20,7 +20,7 @@ function adicionarMensagem(texto, classe) {
       } else {
         clearInterval(typingInterval);
       }
-    }, 40);
+    }, 10);
   } else {
     div.innerText = texto;
   }
