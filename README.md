@@ -23,38 +23,39 @@ Aqui está a lista das tecnologias que usamos
 
 ## Estrutura do Projeto
 
-Caipibot
+```
+Caipibot/
 ├── rasa-project/
-├── src
-│ ├── algorithms/
-│ │ ├── --init--.py
-│ │ ├── linked_list.py
-│ │ └── queue.py
-│ ├── chatbot/
-│ │ ├── --init--.py
-│ │ ├── chatbot.py
-│ │ └── mensagens.py
-│ ├── data/
-│ │ └── cardapio.py
-│ ├── database/
-│ │ ├── --init--.py
-│ │ ├── cliente.py
-│ │ ├── conexao.py
-│ │ └── pedido.py
-│ ├── static/
-│ │ ├── fundo.jpeg
-│ │ ├── icon.png
-│ │ ├── script.js
-│ │ └── style.css
-│ ├── template/
-│ │ └── index.html
-│ ├── --init--.py
-│ └── app.py
+├── src/
+│   ├── algorithms/
+│   │   ├── __init__.py
+│   │   ├── linked_list.py
+│   │   └── queue.py
+│   ├── chatbot/
+│   │   ├── __init__.py
+│   │   ├── chatbot.py
+│   │   └── mensagens.py
+│   ├── data/
+│   │   └── cardapio.py
+│   ├── database/
+│   │   ├── __init__.py
+│   │   ├── cliente.py
+│   │   ├── conexao.py
+│   │   └── pedido.py
+│   ├── static/
+│   │   ├── fundo.jpeg
+│   │   ├── icon.png
+│   │   ├── script.js
+│   │   └── style.css
+│   ├── template/
+│   │   └── index.html
+│   ├── __init__.py
+│   └── app.py
 ├── .gitignore
 ├── LICENSE
 ├── README.md
 └── requirements.txt
-
+```
 ## Como executar
 
 Se quiser utilizar corretamente no seu computador, clone o repositório (ou baixe o zip), e crie o Ambiente Virtual Python (venv) assim como criar apenas o Banco de Dados, apenas o banco de dados, ao executar o programa ele automaticamente vai criar as tabelas.
